@@ -8,6 +8,7 @@ const companySchema = new mongoose.Schema({
   companyName: { type: String, required: true },
   companyEmail: { type: String, required: true, unique: true },
   companySize: { type: Number, required: true },
+  password: { type: String, required: true },
   isEmailVerified: { type: Boolean, default: false },
   emailVerificationCode: { type: String },
   isPhoneVerified: { type: Boolean, default: false },
@@ -17,4 +18,4 @@ const companySchema = new mongoose.Schema({
 const db = mongoose.connection;
 const CompanyModel = mongoose.model("company", companySchema);
 
-module.exports = CompanyModel;
+export default CompanyModel;

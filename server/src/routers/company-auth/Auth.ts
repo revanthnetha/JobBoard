@@ -1,13 +1,16 @@
 import express from "express"
+import { registerCompany, verifyEmail, verifyPhone } from "../../handlers/Auth";
 const Router = express.Router();
 
-Router.post("/register",);
+Router.post("/register",registerCompany);
 
-Router.post("/login",)
+// Router.post("/login",)
 
-Router.post("/logout",)
+// Router.post("/logout",)
 
-Router.get("/verify",)
+Router.get("/verify-email",verifyEmail)
+
+Router.get("/verify-phone",verifyPhone)
 
 
-module.exports = Router
+export default Router
