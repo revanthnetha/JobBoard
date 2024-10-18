@@ -1,7 +1,7 @@
 import express from "express"
 const Router = express.Router();
 
-Router.post("/signup",);
+Router.post("/register",);
 
 Router.post("/login",)
 
