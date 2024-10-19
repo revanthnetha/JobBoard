@@ -15,7 +15,7 @@ const port = process.env.PORT || 5000;
 app.use(express.json());
 connectDB();
 app.use(cors({
-  origin: 'https://jobboard-cuvette.netlify.app/', 
+  origin: 'https://jobboard-cuvette.netlify.app', 
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true,  
 }));
