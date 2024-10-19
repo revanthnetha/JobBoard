@@ -1,13 +1,33 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import icons from "../assets/index";
 
 const Appbar = () => {
   const { logo, home } = icons;
   const [token, setToken] = useState<string | null>(null);
 
-  useEffect(() => {
+  // Function to update token state from localStorage
+  const updateToken = () => {
     const storedToken = localStorage.getItem("jwtToken");
     setToken(storedToken);
+  };
+
+  useEffect(() => {
+    // Set token when the component mounts
+    updateToken();
+
+    // Listen for 'storage' event to update the token when localStorage changes
+    const handleStorageChange = (event: StorageEvent) => {
+      if (event.key === "jwtToken") {
+        updateToken();
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+
+    return () => {
+      // Clean up event listener when the component unmounts
+      window.removeEventListener("storage", handleStorageChange);
+    };
   }, []);
 
   const handleSignOut = () => {
