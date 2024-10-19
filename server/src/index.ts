@@ -3,11 +3,12 @@ import cors from "cors";
 import bodyParser from "body-parser";
 import Router from "./routers/company-auth/Auth";
 import jobRouter from "./routers/job/Job";
-import { configDotenv } from "dotenv";
 import connectDB from "./db";
+import dotenv from 'dotenv';
+dotenv.config();
+
 
 const app = express();
-configDotenv();
 
 const port = process.env.PORT || 5000;
 
@@ -16,10 +17,12 @@ connectDB();
 app.use(cors());
 app.use(bodyParser.json());
 
-
+app.get("/",async (req,res)=>{
+  res.send("Hello from server");
+})
 app.use("/api/company", Router);
 app.use("/api/job", jobRouter);
 
 app.listen(3000, () => {
-  console.log(`Server is running on http://localhost:${port}`);
+  console.log(`Server is running on http://localhost:3000`);
 });

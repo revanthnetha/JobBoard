@@ -1,25 +1,45 @@
-import React, { useState } from 'react';
-import { z } from 'zod';
-import { jobSchema, jobRegistrationData } from "../../../common/types/job-info"
-import Button from '../components/button';
+import React, { useState } from "react";
+import { z } from "zod";
+import { jobSchema, jobRegistrationData } from "../../../common/types/job-info";
+import Button from "../components/button";
 
 const Dashboard = () => {
-  // State for form inputs
-  const [jobTitle, setJobTitle] = useState<string>('');
-  const [jobDescription, setJobDescription] = useState<string>('');
-  const [experienceLevel, setExperienceLevel] = useState<string>('');
+  const [jobTitle, setJobTitle] = useState<string>("");
+  const [jobDescription, setJobDescription] = useState<string>("");
+  const [experienceLevel, setExperienceLevel] = useState<string>("");
   const [candidateEmails, setCandidateEmails] = useState<string[]>([]);
-  const [endDate, setEndDate] = useState<string>('');
-  const [errors, setErrors] = useState<Record<string, string>>({}); // To handle validation errors
-
+  const [newEmail, setNewEmail] = useState<string>("");
+  const [endDate, setEndDate] = useState<string>("");
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [isFormVisible, setIsFormVisible] = useState(false);
 
-  // Function to handle form visibility
   const handleCreateInterviewClick = () => {
-    setIsFormVisible(true); // Show form and disable button
+    setIsFormVisible(true);
   };
 
-  // Function to handle form submission
+  const handleBackClick = () => {
+    setIsFormVisible(false);
+  };
+
+  const handleEmailInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNewEmail(e.target.value);
+  };
+
+  const handleAddEmail = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && newEmail) {
+      e.preventDefault();
+      const trimmedEmail = newEmail.trim();
+      if (trimmedEmail) {
+        setCandidateEmails((prev) => [...prev, trimmedEmail]);
+        setNewEmail("");
+      }
+    }
+  };
+
+  const handleRemoveEmail = (email: string) => {
+    setCandidateEmails((prev) => prev.filter((e) => e !== email));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -32,18 +52,14 @@ const Dashboard = () => {
     };
 
     try {
-      // Validate the jobData with Zod
       jobSchema.parse(jobData);
-
-      // Clear any previous errors if validation is successful
       setErrors({});
 
       // Send data to the backend
-      alert('Job created successfully!');
-      setIsFormVisible(false); // Hide form after submission
+      alert("Job created successfully!");
+      setIsFormVisible(false);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        // Capture and set validation errors
         const formattedErrors: Record<string, string> = {};
         error.errors.forEach((err) => {
           if (err.path[0]) {
@@ -52,91 +68,146 @@ const Dashboard = () => {
         });
         setErrors(formattedErrors);
       } else {
-        alert('An unexpected error occurred.');
+        alert("An unexpected error occurred.");
       }
     }
   };
 
   return (
-    <div className="flex flex-col ml-16 min-h-screen">
-      {!isFormVisible && (
-        <Button value="Create Interview" handleSubmit={handleCreateInterviewClick} />
-      )}
-
-      {/* Show the form on the page when Create Interview is clicked */}
-      {isFormVisible && (
-        <div className="bg-white p-6 rounded-lg  ml-12 mt-6">
-          {/* Form */}
+    <div className="flex flex-col ml-16">
+      {!isFormVisible ? (
+        <Button
+          value="Create Interview"
+          handleSubmit={handleCreateInterviewClick}
+        />
+      ) : (
+        <div className="bg-white p-6 rounded-lg mt-6">
           <form onSubmit={handleSubmit}>
-            <div className="mb-4 flex gap-2">
-              <label className="block text text-black">Job Title</label>
+            <div className="mb-4 flex items-center">
+              <label className="text-black text-[DM Sans] font-semibold text-[22px] pl-24 w-1/4">
+                Job Title:
+              </label>
               <input
                 type="text"
                 value={jobTitle}
                 onChange={(e) => setJobTitle(e.target.value)}
-                placeholder='Enter Job Title'
+                placeholder="Enter Job Title"
                 required
-                className={` text-[#535353B2] text-[DM Sans] border border-gray-300 px-3 py-2  ${errors.title ? 'border-red-500' : 'border-gray-300'} rounded-lg`}
+                className={`w-2/4 h-[50px] text-[#535353B2] border border-gray-300 px-3 py-2 ${
+                  errors.title ? "border-red-500" : "border-gray-300"
+                } rounded-lg`}
               />
-              {errors.title && <p className="text-red-500 text-sm">{errors.title}</p>}
             </div>
+            {errors.title && (
+              <p className="text-red-500 text-sm">{errors.title}</p>
+            )}
 
-            <div className="mb-4 flex gap-2">
-              <label className="block text text-black">Job Description</label>
+            <div className="mb-4 flex items-center">
+              <label className="text-black text-[DM Sans] font-semibold text-[22px] pl-24 w-1/4">
+                Job Description:
+              </label>
               <textarea
                 value={jobDescription}
                 onChange={(e) => setJobDescription(e.target.value)}
-                placeholder='Enter Job Description'
+                placeholder="Enter Job Description"
                 required
-                className={` text-[#535353B2] text-[DM Sans] border border-gray-300  px-3 py-2  ${errors.description ? 'border-red-500' : 'border-gray-300'} rounded-lg`}
+                className={`w-2/4 h-[100px] text-[#535353B2] border border-gray-300 px-3 py-2 ${
+                  errors.description ? "border-red-500" : "border-gray-300"
+                } rounded-lg`}
               />
-              {errors.description && <p className="text-red-500 text-sm">{errors.description}</p>}
             </div>
+            {errors.description && (
+              <p className="text-red-500 text-sm">{errors.description}</p>
+            )}
 
-            <div className="mb-4 flex gap-2">
-              <label className="block text text-black">Experience Level</label>
+            <div className="mb-4 flex items-center">
+              <label className="text-black text-[DM Sans] font-semibold text-[22px] pl-24 w-1/4">
+                Experience Level:
+              </label>
               <select
                 value={experienceLevel}
                 onChange={(e) => setExperienceLevel(e.target.value)}
                 required
-                className={` text-[#535353B2] text-[DM Sans] border border-gray-300  px-3 py-2  ${errors.experienceLevel ? 'border-red-500' : 'border-gray-300'} rounded-lg`}
+                className={`w-2/4 h-[50px] text-[#535353B2] border border-gray-300 px-3 py-2 ${
+                  errors.experienceLevel ? "border-red-500" : "border-gray-300"
+                } rounded-lg`}
               >
                 <option value="">Select Experience Level</option>
                 <option value="Junior">Junior</option>
                 <option value="Mid">Mid</option>
                 <option value="Senior">Senior</option>
               </select>
-              {errors.experienceLevel && <p className="text-red-500 text-sm">{errors.experienceLevel}</p>}
             </div>
+            {errors.experienceLevel && (
+              <p className="text-red-500 text-sm">{errors.experienceLevel}</p>
+            )}
 
-            <div className="mb-4 flex gap-2">
-              <label className="block text">Candidate Emails</label>
-              <input
-                type="text"
-                placeholder="Enter emails separated by commas"
-                value={candidateEmails.join(', ')}
-                onChange={(e) => setCandidateEmails(e.target.value.split(',').map((email) => email.trim()))}
-                required
-                className={` text-[#535353B2] text-[DM Sans] border border-gray-300  px-3 py-2  ${errors.candidates ? 'border-red-500' : 'border-gray-300'} rounded-lg`}
-              />
-              {errors.candidates && <p className="text-red-500 text-sm">{errors.candidates}</p>}
+            <div className="mb-4 flex items-center">
+              <label className="text-black text-[DM Sans] font-semibold text-[22px] pl-24 w-1/4">
+                Candidate Emails:
+              </label>
+              <div className="w-2/4 flex flex-wrap items-center border border-gray-300 rounded-lg px-3 py-2">
+                {candidateEmails.map((email) => (
+                  <div
+                    key={email}
+                    className="flex items-center bg-gray-200 rounded-full px-2 py-1 m-1"
+                  >
+                    <span>{email}</span>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveEmail(email)}
+                      className="ml-2 text-red-500"
+                    >
+                      x
+                    </button>
+                  </div>
+                ))}
+                <input
+                  type="text"
+                  value={newEmail}
+                  onChange={handleEmailInputChange}
+                  onKeyDown={handleAddEmail}
+                  placeholder="Enter an email"
+                  className="border-none outline-none"
+                />
+              </div>
             </div>
+            {errors.candidates && (
+              <p className="text-red-500 text-sm">{errors.candidates}</p>
+            )}
 
-            <div className="mb-4 flex gap-2">
-              <label className="block text">End Date</label>
+            <div className="mb-4 flex items-center">
+              <label className="text-black text-[DM Sans] font-semibold text-[22px] pl-24 w-1/4">
+                End Date:
+              </label>
               <input
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                placeholder='End Date'
                 required
-                className={` text-[#535353B2] text-[DM Sans] border border-gray-300  px-3 py-2  ${errors.endDate ? 'border-red-500' : 'border-gray-300'} rounded-lg`}
+                className={`w-2/4 h-[50px] text-[#535353B2] border border-gray-300 px-3 py-2 ${
+                  errors.endDate ? "border-red-500" : "border-gray-300"
+                } rounded-lg`}
               />
-              {errors.endDate && <p className="text-red-500 text-sm">{errors.endDate}</p>}
             </div>
-            <div className='flex flex-end w-16'>
-              <Button value="Create Job" handleSubmit={handleCreateInterviewClick} />
-              </div>
+            {errors.endDate && (
+              <p className="text-red-500 text-sm">{errors.endDate}</p>
+            )}
+
+            <div className="flex gap-2 justify-end mt-4 w-3/4">
+              <button
+                onClick={handleBackClick}
+                className="w-[80px] h-[43px] rounded-[7px] bg-[#0B66EF] text-white mt-4"
+              >
+                Back
+              </button>
+              <button
+                onClick={handleSubmit}
+                className="w-[80px] h-[43px] rounded-[7px] bg-[#0B66EF] text-white mt-4"
+              >
+                Send
+              </button>
+            </div>
           </form>
         </div>
       )}

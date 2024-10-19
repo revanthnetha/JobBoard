@@ -11,8 +11,8 @@ const Appbar = () => {
   };
 
   return (
-    <div className="flex justify-between p-8 border-b">
-      <div className="w-[165px] h-[43px]">
+    <div className="flex justify-between px-8 py-4 border-b">
+      <div className="w-[125px] h-[23px] flex justify-center flex-col">
         <img src={logo} alt="Logo" />
       </div>
 

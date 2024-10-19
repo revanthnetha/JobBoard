@@ -1,10 +1,13 @@
-import express,{Request,Response} from "express";
+import express, { Request, Response } from "express";
 import nodemailer from "nodemailer";
 import twilio from "twilio";
 import CompanyModel from "../models/CompanyModel";
-import {z} from "zod"
+import { z } from "zod";
+import jwt from "jsonwebtoken";
+import dotenv from 'dotenv';
+dotenv.config();
 
- const companyRegistrationSchema = z.object({
+const companyRegistrationSchema = z.object({
   name: z.string().min(2, "Name is too short"),
   phoneNo: z.number().min(10, "Phone number is invalid"),
   companyName: z.string().min(2, "Company name is too short"),
@@ -12,9 +15,12 @@ import {z} from "zod"
   companySize: z.number().min(1, "Company size must be at least 1"),
 });
 
+const JWT_SECRET = process.env.JWT_SECRET || "secret"
+
 type CompanyRegistrationData = z.infer<typeof companyRegistrationSchema>;
 
-const twilioClient = twilio(process.env.TWILIO_SID,process.env.TWILIO_AUTH_TOKEN);
+console.log(process.env.TWILIO_SID);
+const twilioClient = twilio(process.env.TWILIO_SID, process.env.TWILIO_AUTH_TOKEN);
 
 const transporter = nodemailer.createTransport({
   service: "Gmail",
@@ -28,10 +34,14 @@ const generateOTP = () => {
   return Math.floor(100000 + Math.random() * 986500);
 };
 
+const generateJWT = (companyId: string) => {
+  return jwt.sign({ companyId },JWT_SECRET);
+};
+
 export const registerCompany = async (req: Request, res: Response): Promise<void> => {
   try {
     const validatedData: CompanyRegistrationData = companyRegistrationSchema.parse(req.body);
-    const { name, phoneNo, companyName, companyEmail, companySize} = validatedData;
+    const { name, phoneNo, companyName, companyEmail, companySize } = validatedData;
 
     const emailOTP = generateOTP();
     const phoneOTP = generateOTP();
@@ -57,9 +67,9 @@ export const registerCompany = async (req: Request, res: Response): Promise<void
 
     transporter.sendMail(emailOptions, (err, info) => {
       if (err) {
-        console.error("Error sending email:", err)
+        console.error("Error sending email:", err);
         return;
-      };
+      }
     });
 
     twilioClient.messages
@@ -86,35 +96,47 @@ export const verifyEmail = async (req: Request, res: Response): Promise<void> =>
   try {
     const company = await CompanyModel.findOne({ companyEmail, emailVerificationCode: otp });
     if (!company) {
-     res.status(400).json({ message: "Invalid OTP or email" });
-     return;
+      res.status(400).json({ message: "Invalid OTP or email" });
+      return;
     }
 
     company.isEmailVerified = true;
     company.emailVerificationCode = null;
     await company.save();
 
-    res.status(200).json({ message: "Email verified successfully!" });
+    if (company.isPhoneVerified) {
+      const token = generateJWT(company._id.toString());
+      res.status(200).json({ message: "Email verified successfully!", token });
+      return;
+    }
+
+    res.status(200).json({ message: "Email verified successfully! Please verify your phone number." });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error verifying email." });
   }
 };
 
-export const verifyPhone = async (req: Request, res: Response):Promise<void> => {
+export const verifyPhone = async (req: Request, res: Response): Promise<void> => {
   const { phoneNo, otp } = req.body;
   try {
     const company = await CompanyModel.findOne({ phoneNo, phoneVerificationCode: otp });
     if (!company) {
-     res.status(400).json({ message: "Invalid OTP or phone number" });
-     return;
+      res.status(400).json({ message: "Invalid OTP or phone number" });
+      return;
     }
 
     company.isPhoneVerified = true;
-    company.phoneVerificationCode = null; 
+    company.phoneVerificationCode = null;
     await company.save();
 
-    res.status(200).json({ message: "Phone number verified successfully!" });
+    if (company.isEmailVerified) {
+      const token = generateJWT(company._id.toString());
+      res.status(200).json({ message: "Phone number verified successfully!", token });
+      return;
+    }
+
+    res.status(200).json({ message: "Phone number verified successfully! Please verify your email." });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error verifying phone number." });
