@@ -1,16 +1,21 @@
-import { Request, Response } from "express";
+import express,{Request,Response} from "express";
 import nodemailer from "nodemailer";
 import twilio from "twilio";
-import bcrypt from "bcrypt";
 import CompanyModel from "../models/CompanyModel";
-import { companyRegistrationSchema, CompanyRegistrationData } from "../../../common/types/company-info";
-import crypto from "crypto";
 import {z} from "zod"
 
-// Configure Twilio
+ const companyRegistrationSchema = z.object({
+  name: z.string().min(2, "Name is too short"),
+  phoneNo: z.number().min(10, "Phone number is invalid"),
+  companyName: z.string().min(2, "Company name is too short"),
+  companyEmail: z.string().email("Invalid email format"),
+  companySize: z.number().min(1, "Company size must be at least 1"),
+});
+
+type CompanyRegistrationData = z.infer<typeof companyRegistrationSchema>;
+
 const twilioClient = twilio(process.env.TWILIO_SID,process.env.TWILIO_AUTH_TOKEN);
 
-// Configure Nodemailer
 const transporter = nodemailer.createTransport({
   service: "Gmail",
   auth: {
@@ -23,13 +28,10 @@ const generateOTP = () => {
   return Math.floor(100000 + Math.random() * 986500);
 };
 
-// Registration
-export const registerCompany = async (req: Request, res: Response) => {
+export const registerCompany = async (req: Request, res: Response): Promise<void> => {
   try {
     const validatedData: CompanyRegistrationData = companyRegistrationSchema.parse(req.body);
-    const { name, phoneNo, companyName, companyEmail, companySize, password } = validatedData;
-
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const { name, phoneNo, companyName, companyEmail, companySize} = validatedData;
 
     const emailOTP = generateOTP();
     const phoneOTP = generateOTP();
@@ -40,7 +42,6 @@ export const registerCompany = async (req: Request, res: Response) => {
       companyName,
       companyEmail,
       companySize,
-      password: hashedPassword,
       emailVerificationCode: emailOTP.toString(),
       phoneVerificationCode: phoneOTP.toString(),
     });
@@ -55,7 +56,10 @@ export const registerCompany = async (req: Request, res: Response) => {
     };
 
     transporter.sendMail(emailOptions, (err, info) => {
-      if (err) console.error("Error sending email:", err);
+      if (err) {
+        console.error("Error sending email:", err)
+        return;
+      };
     });
 
     twilioClient.messages
@@ -70,19 +74,20 @@ export const registerCompany = async (req: Request, res: Response) => {
     res.status(201).json({ message: "Company registered. Verify your email and phone number." });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return res.status(400).json({ errors: error.errors });
+      res.status(400).json({ errors: error.errors });
+      return;
     }
     res.status(500).json({ message: "Internal server error" });
   }
 };
 
-// Email Verification
-export const verifyEmail = async (req: Request, res: Response) => {
+export const verifyEmail = async (req: Request, res: Response): Promise<void> => {
   const { companyEmail, otp } = req.body;
   try {
     const company = await CompanyModel.findOne({ companyEmail, emailVerificationCode: otp });
     if (!company) {
-      return res.status(400).json({ message: "Invalid OTP or email" });
+     res.status(400).json({ message: "Invalid OTP or email" });
+     return;
     }
 
     company.isEmailVerified = true;
@@ -96,13 +101,13 @@ export const verifyEmail = async (req: Request, res: Response) => {
   }
 };
 
-// Phone Verification
-export const verifyPhone = async (req: Request, res: Response) => {
+export const verifyPhone = async (req: Request, res: Response):Promise<void> => {
   const { phoneNo, otp } = req.body;
   try {
     const company = await CompanyModel.findOne({ phoneNo, phoneVerificationCode: otp });
     if (!company) {
-      return res.status(400).json({ message: "Invalid OTP or phone number" });
+     res.status(400).json({ message: "Invalid OTP or phone number" });
+     return;
     }
 
     company.isPhoneVerified = true;
