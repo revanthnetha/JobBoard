@@ -7,6 +7,7 @@ import icons from "../assets/index";
 import { companyRegistrationSchema } from "../../../common/types/company-info";
 import z from "zod";
 import Input from "../components/Input";
+import Button from "../components/button";
 
 const Signup = () => {
   const toast = useToast();
@@ -172,12 +173,7 @@ const Signup = () => {
                 onChange={handleChange}
                 name="companySize"
               />
-              <button
-                onClick={handleSubmit}
-                className="md:w-[542px] h-[43px] rounded-[7px] bg-[#0B66EF] text-white mt-4"
-              >
-                Proceed
-              </button>
+             <Button value="Proceed" handleSubmit={handleSubmit}/>
             </>
           ) : (
             <>

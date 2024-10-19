@@ -4,6 +4,7 @@ import mail from "./mail.png"
 import groups from "./groups.png"
 import phone from "./phone.png"
 import check from "./check_circle.png"
+import home from "./home.png"
 
 export default {
     personIcon,
@@ -11,5 +12,6 @@ export default {
     mail,
     groups,
     phone,
-    check
+    check,
+    home
 }

@@ -1,7 +1,10 @@
-import express from "express"
-const Router = express.Router();
+import express from "express";
+import { postJob } from "../../handlers/Job";
+import { authenticateJWT } from "../../middlewares/auth";
 
-Router.post("/post",)
+const jobRouter = express.Router();
 
+// Route for posting jobs
+jobRouter.post("/post", authenticateJWT, postJob);
 
-module.exports = Router
+export default jobRouter;

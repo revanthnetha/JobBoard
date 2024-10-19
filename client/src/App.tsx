@@ -2,6 +2,7 @@ import './App.css'
 import { Route,Routes,BrowserRouter } from 'react-router-dom'
 import Signup from './pages/Signup'
 import Appbar from './components/Appbar'
+import Dashboard from './pages/Dashboard'
 
 function App() {
 
@@ -11,6 +12,7 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path='/' element={<Signup/>}/>
+          <Route path="/dashboard" element={<Dashboard/>} />
         </Routes>
       </BrowserRouter>
     </>

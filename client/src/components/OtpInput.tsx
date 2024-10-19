@@ -1,6 +1,6 @@
 import React from "react";
 import Input from "./Input";
-// import { CheckIcon } from "@heroicons/react/outline"; // For success icon
+import Button from "./button";
 
 interface OtpInputProps {
   placeholder: string;
@@ -34,12 +34,7 @@ const OtpInput: React.FC<OtpInputProps> = ({
       {verified ? (
         ""
       ) : (
-        <button
-          onClick={onVerify}
-          className="w-[310px] h-[40px] md:w-[532px] md:h-[43px] rounded-[7px] bg-[#0B66EF] text-white mt-2 text-[DM Sans] font-semibold text-[24px]"
-        >
-          Verify
-        </button>
+        <Button value={"Verify"} handleSubmit={onVerify}/>
       )}
     </div>
   );
