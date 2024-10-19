@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useToast } from "@chakra-ui/react";
-import { useNavigate } from "react-router-dom"; 
+import { useNavigate } from "react-router-dom";
 import Card from "../components/Card";
 import OtpInput from "../components/OtpInput";
 import icons from "../assets/index";
@@ -8,14 +8,13 @@ import { companyRegistrationSchema } from "../../../common/types/company-info";
 import z from "zod";
 import Input from "../components/Input";
 import Button from "../components/Button";
-import axios from "axios"
-import {BACKEND_URL} from "../../config"
-
+import axios from "axios";
+import { BACKEND_URL } from "../../config";
 
 const Signup = () => {
   const toast = useToast();
   const navigate = useNavigate();
-  const { personIcon,mail,phone,groups } = icons;
+  const { personIcon, mail, phone, groups } = icons;
 
   const [currentStep, setCurrentStep] = useState(0);
 
@@ -50,7 +49,6 @@ const Signup = () => {
     }
   };
 
- 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -63,13 +61,13 @@ const Signup = () => {
           companyEmail: formData.companyEmail,
           companySize: Number(formData.companySize),
         });
-        const res = await axios.post(`${BACKEND_URL}company/register`,{
-          name:formData.name,
-          phoneNo:formData.phoneNo,
-          companyName:formData.companyName,
+        const res = await axios.post(`${BACKEND_URL}company/register`, {
+          name: formData.name,
+          phoneNo: formData.phoneNo,
+          companyName: formData.companyName,
           companyEmail: formData.companyEmail,
-          companySize: Number(formData.companySize)
-        })
+          companySize: Number(formData.companySize),
+        });
         console.log(res.data);
         setCurrentStep(1);
         toast({
@@ -95,14 +93,14 @@ const Signup = () => {
 
   const verifyEmailOtp = async () => {
     const res = await axios.post(`${BACKEND_URL}company/verify-email`, {
-      companyEmail: formData.companyEmail,  
+      companyEmail: formData.companyEmail,
       otp: otpData.emailOtp,
     });
     const token = res.data.token;
-    if(token!=null){
-      localStorage.setItem("jwtToken",`Bearer ${token}`)
+    if (token != null) {
+      localStorage.setItem("jwtToken", `Bearer ${token}`);
     }
-    console.log(res.data)
+    console.log(res.data);
     if (res.status === 200) {
       setEmailVerified(true);
       toast({
@@ -123,14 +121,14 @@ const Signup = () => {
 
   const verifyPhoneOtp = async () => {
     const res = await axios.post(`${BACKEND_URL}company/verify-phone`, {
-      phoneNo: formData.phoneNo, 
-      otp: otpData.phoneOtp,     
+      phoneNo: formData.phoneNo,
+      otp: otpData.phoneOtp,
     });
     const token = res.data.token;
-    if(token!=null){
-      localStorage.setItem("jwtToken",`Bearer ${token}`)
+    if (token != null) {
+      localStorage.setItem("jwtToken", `Bearer ${token}`);
     }
-    console.log(res.data)
+    console.log(res.data);
     if (res.status === 200) {
       setPhoneVerified(true);
       toast({
@@ -155,16 +153,16 @@ const Signup = () => {
   }
 
   return (
-    <div className="flex flex-col md:flex-row justify-around align-center py-4">
-      <div className="flex flex-col justify-center">
-        <div className="font-[DM Sans] font-semibold text-[22px] text-[#292929B2] md:w-[622px] h-[116px] flex justify-center flex-col text-left">
+    <div className="flex flex-col lg:flex-row justify-around items-center py-4 px-4 md:px-10 space-y-4 md:space-y-0 w-full h-full">
+      <div className="flex flex-col justify-center w-full md:w-1/2 space-y-6 mb-10 lg:mb-0">
+        <div className="font-[DM Sans] font-semibold text-[18px] md:text-[22px] text-[#292929B2] w-full md:w-[90%] lg:w-[80%] flex justify-center flex-col text-left">
           Lorem Ipsum is simply dummy text of the printing and typesetting
           industry. Lorem Ipsum has been the industry's standard dummy text ever
           since the 1500s, when an unknown printer took a galley
         </div>
       </div>
-      <Card>
-        <div className="flex flex-col">
+      <Card className="w-full md:w-1/3 p-6">
+        <div className="flex flex-col space-y-4">
           {currentStep === 0 ? (
             <>
               <Input
@@ -198,7 +196,9 @@ const Signup = () => {
                 onChange={handleChange}
                 name="companySize"
               />
-             <Button value="Proceed" handleSubmit={handleSubmit}/>
+              <div className="flex justify-center">
+              <Button value="Proceed" handleSubmit={handleSubmit} />
+              </div>
             </>
           ) : (
             <>

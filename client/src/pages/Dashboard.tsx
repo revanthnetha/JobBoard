@@ -57,10 +57,10 @@ const Dashboard = () => {
       jobSchema.parse(jobData);
       setErrors({});
 
-      const response = await axios.post(`${BACKEND_URL}job/post`, jobData,{
-        headers:{
-          Authorization:localStorage.getItem("jwtToken")
-        }
+      const response = await axios.post(`${BACKEND_URL}job/post`, jobData, {
+        headers: {
+          Authorization: localStorage.getItem("jwtToken"),
+        },
       });
       console.log(response.data);
 
@@ -69,7 +69,7 @@ const Dashboard = () => {
       setExperienceLevel("");
       setCandidateEmails([]);
       setEndDate("");
-      
+
       alert("Job created successfully!");
       setIsFormVisible(false);
     } catch (error) {
@@ -88,7 +88,7 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="flex flex-col ml-16">
+    <div className="flex flex-col md:ml-16 ml-4">
       {!isFormVisible ? (
         <Button
           value="Create Interview"
@@ -97,8 +97,8 @@ const Dashboard = () => {
       ) : (
         <div className="bg-white p-6 rounded-lg mt-6">
           <form onSubmit={handleSubmit}>
-            <div className="mb-4 flex items-center">
-              <label className="text-black text-[DM Sans] font-semibold text-[22px] pl-24 w-1/4">
+            <div className="mb-4 flex flex-col md:flex-row items-center">
+              <label className="text-black font-semibold text-lg md:text-xl md:pl-24 w-full md:w-1/4">
                 Job Title:
               </label>
               <input
@@ -107,17 +107,17 @@ const Dashboard = () => {
                 onChange={(e) => setJobTitle(e.target.value)}
                 placeholder="Enter Job Title"
                 required
-                className={`w-2/4 h-[50px] text-[#535353B2] border border-gray-300 px-3 py-2 ${
+                className={`w-full md:w-2/4 h-12 text-[#535353B2] border px-3 py-2 ${
                   errors.title ? "border-red-500" : "border-gray-300"
-                } rounded-lg`}
+                } rounded-lg mt-2 md:mt-0`}
               />
             </div>
             {errors.title && (
               <p className="text-red-500 text-sm">{errors.title}</p>
             )}
 
-            <div className="mb-4 flex items-center">
-              <label className="text-black text-[DM Sans] font-semibold text-[22px] pl-24 w-1/4">
+            <div className="mb-4 flex flex-col md:flex-row items-center">
+              <label className="text-black font-semibold text-lg md:text-xl md:pl-24 w-full md:w-1/4">
                 Job Description:
               </label>
               <textarea
@@ -125,26 +125,28 @@ const Dashboard = () => {
                 onChange={(e) => setJobDescription(e.target.value)}
                 placeholder="Enter Job Description"
                 required
-                className={`w-2/4 h-[100px] text-[#535353B2] border border-gray-300 px-3 py-2 ${
+                className={`w-full md:w-2/4 h-24 text-[#535353B2] border px-3 py-2 ${
                   errors.description ? "border-red-500" : "border-gray-300"
-                } rounded-lg`}
+                } rounded-lg mt-2 md:mt-0`}
               />
             </div>
             {errors.description && (
               <p className="text-red-500 text-sm">{errors.description}</p>
             )}
 
-            <div className="mb-4 flex items-center">
-              <label className="text-black text-[DM Sans] font-semibold text-[22px] pl-24 w-1/4">
+            <div className="mb-4 flex flex-col md:flex-row items-center">
+              <label className="text-black font-semibold text-lg md:text-xl md:pl-24 w-full md:w-1/4">
                 Experience Level:
               </label>
               <select
                 value={experienceLevel}
                 onChange={(e) => setExperienceLevel(e.target.value)}
                 required
-                className={`w-2/4 h-[50px] text-[#535353B2] border border-gray-300 px-3 py-2 ${
-                  errors.experienceLevel ? "border-red-500" : "border-gray-300"
-                } rounded-lg`}
+                className={`w-full md:w-2/4 h-12 text-[#535353B2] border px-3 py-2 ${
+                  errors.experienceLevel
+                    ? "border-red-500"
+                    : "border-gray-300"
+                } rounded-lg mt-2 md:mt-0`}
               >
                 <option value="">Select Experience Level</option>
                 <option value="Junior">Junior</option>
@@ -156,11 +158,11 @@ const Dashboard = () => {
               <p className="text-red-500 text-sm">{errors.experienceLevel}</p>
             )}
 
-            <div className="mb-4 flex items-center">
-              <label className="text-black text-[DM Sans] font-semibold text-[22px] pl-24 w-1/4">
+            <div className="mb-4 flex flex-col md:flex-row items-center">
+              <label className="text-black font-semibold text-lg md:text-xl md:pl-24 w-full md:w-1/4">
                 Candidate Emails:
               </label>
-              <div className="w-2/4 flex flex-wrap items-center border border-gray-300 rounded-lg px-3 py-2">
+              <div className="w-full md:w-2/4 flex flex-wrap items-center border border-gray-300 rounded-lg px-3 py-2 mt-2 md:mt-0">
                 {candidateEmails.map((email) => (
                   <div
                     key={email}
@@ -182,7 +184,7 @@ const Dashboard = () => {
                   onChange={handleEmailInputChange}
                   onKeyDown={handleAddEmail}
                   placeholder="Enter an email"
-                  className="border-none outline-none"
+                  className="border-none outline-none w-full md:w-auto"
                 />
               </div>
             </div>
@@ -190,8 +192,8 @@ const Dashboard = () => {
               <p className="text-red-500 text-sm">{errors.candidates}</p>
             )}
 
-            <div className="mb-4 flex items-center">
-              <label className="text-black text-[DM Sans] font-semibold text-[22px] pl-24 w-1/4">
+            <div className="mb-4 flex flex-col md:flex-row items-center">
+              <label className="text-black font-semibold text-lg md:text-xl md:pl-24 w-full md:w-1/4">
                 End Date:
               </label>
               <input
@@ -199,25 +201,25 @@ const Dashboard = () => {
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
                 required
-                className={`w-2/4 h-[50px] text-[#535353B2] border border-gray-300 px-3 py-2 ${
+                className={`w-full md:w-2/4 h-12 text-[#535353B2] border px-3 py-2 ${
                   errors.endDate ? "border-red-500" : "border-gray-300"
-                } rounded-lg`}
+                } rounded-lg mt-2 md:mt-0`}
               />
             </div>
             {errors.endDate && (
               <p className="text-red-500 text-sm">{errors.endDate}</p>
             )}
 
-            <div className="flex gap-2 justify-end mt-4 w-3/4">
+            <div className="flex flex-col md:flex-row gap-2 justify-end mt-4 md:w-3/4">
               <button
                 onClick={handleBackClick}
-                className="w-[80px] h-[43px] rounded-[7px] bg-[#0B66EF] text-white mt-4"
+                className="w-full md:w-[80px] h-[43px] rounded-[7px] bg-[#0B66EF] text-white mt-4"
               >
                 Back
               </button>
               <button
                 onClick={handleSubmit}
-                className="w-[80px] h-[43px] rounded-[7px] bg-[#0B66EF] text-white mt-4"
+                className="w-full md:w-[80px] h-[43px] rounded-[7px] bg-[#0B66EF] text-white mt-4"
               >
                 Send
               </button>
