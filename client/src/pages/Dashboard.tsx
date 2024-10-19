@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { z } from "zod";
 import { jobSchema, jobRegistrationData } from "../../../common/types/job-info";
-import Button from "../components/button";
+import Button from "../components/Button";
 import axios from "axios";
+import { BACKEND_URL } from "../../config";
 
 const Dashboard = () => {
   const [jobTitle, setJobTitle] = useState<string>("");
@@ -56,7 +57,7 @@ const Dashboard = () => {
       jobSchema.parse(jobData);
       setErrors({});
 
-      const response = await axios.post("/api/jobs", jobData,{
+      const response = await axios.post(`${BACKEND_URL}job/post`, jobData,{
         headers:{
           Authorization:localStorage.getItem("jwtToken")
         }

@@ -4,9 +4,9 @@ const Router = express.Router();
 
 Router.post("/register",registerCompany);
 
-Router.get("/verify-email",verifyEmail)
+Router.post("/verify-email",verifyEmail)
 
-Router.get("/verify-phone",verifyPhone)
+Router.post("/verify-phone",verifyPhone)
 
 
 export default Router

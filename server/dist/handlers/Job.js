@@ -35,8 +35,7 @@ const transporter = nodemailer_1.default.createTransport({
 });
 const postJob = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        // req["userId"].companyId
-        const companyId = "6713964a723be08fef1fff31";
+        const companyId = req["userId"].companyId;
         const company = yield CompanyModel_1.default.findById(companyId);
         if (!company) {
             res.status(404).json({ message: "Company not found" });

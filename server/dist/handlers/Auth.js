@@ -22,13 +22,12 @@ const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 const companyRegistrationSchema = zod_1.z.object({
     name: zod_1.z.string().min(2, "Name is too short"),
-    phoneNo: zod_1.z.number().min(10, "Phone number is invalid"),
+    phoneNo: zod_1.z.string().min(10, "Phone number is invalid"),
     companyName: zod_1.z.string().min(2, "Company name is too short"),
     companyEmail: zod_1.z.string().email("Invalid email format"),
     companySize: zod_1.z.number().min(1, "Company size must be at least 1"),
 });
 const JWT_SECRET = process.env.JWT_SECRET || "secret";
-console.log(process.env.TWILIO_SID);
 const twilioClient = (0, twilio_1.default)(process.env.TWILIO_SID, process.env.TWILIO_AUTH_TOKEN);
 const transporter = nodemailer_1.default.createTransport({
     service: "Gmail",
@@ -43,15 +42,21 @@ const generateOTP = () => {
 const generateJWT = (companyId) => {
     return jsonwebtoken_1.default.sign({ companyId }, JWT_SECRET);
 };
+// Function to format phone number to E.164
+const formatPhoneNumberToE164 = (phoneNo, countryCode) => {
+    // Example: "+91" for India
+    return countryCode + phoneNo;
+};
 const registerCompany = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const validatedData = companyRegistrationSchema.parse(req.body);
         const { name, phoneNo, companyName, companyEmail, companySize } = validatedData;
         const emailOTP = generateOTP();
         const phoneOTP = generateOTP();
+        const formattedPhoneNo = formatPhoneNumberToE164(phoneNo, "+91");
         const newCompany = new CompanyModel_1.default({
             name,
-            phoneNo,
+            phoneNo: formattedPhoneNo,
             companyName,
             companyEmail,
             companySize,
@@ -71,15 +76,19 @@ const registerCompany = (req, res) => __awaiter(void 0, void 0, void 0, function
                 return;
             }
         });
-        twilioClient.messages
-            .create({
-            body: `Your verification code is ${phoneOTP}`,
-            to: String(phoneNo),
-            from: process.env.MOBILE_TWILIO,
+        twilioClient.verify.v2
+            .services(process.env.TWILIO_VERIFY_SERVICE_SID)
+            .verifications.create({
+            to: formattedPhoneNo,
+            channel: "sms",
         })
-            .then((message) => console.log("SMS sent:", message.sid))
+            .then((verification) => console.log("SMS sent:", verification.sid))
             .catch((error) => console.error("Error sending SMS:", error));
-        res.status(201).json({ message: "Company registered. Verify your email and phone number." });
+        res
+            .status(201)
+            .json({
+            message: "Company registered. Verify your email and phone number.",
+        });
     }
     catch (error) {
         if (error instanceof zod_1.z.ZodError) {
@@ -93,7 +102,10 @@ exports.registerCompany = registerCompany;
 const verifyEmail = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { companyEmail, otp } = req.body;
     try {
-        const company = yield CompanyModel_1.default.findOne({ companyEmail, emailVerificationCode: otp });
+        const company = yield CompanyModel_1.default.findOne({
+            companyEmail,
+            emailVerificationCode: otp,
+        });
         if (!company) {
             res.status(400).json({ message: "Invalid OTP or email" });
             return;
@@ -106,7 +118,11 @@ const verifyEmail = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
             res.status(200).json({ message: "Email verified successfully!", token });
             return;
         }
-        res.status(200).json({ message: "Email verified successfully! Please verify your phone number." });
+        res
+            .status(200)
+            .json({
+            message: "Email verified successfully! Please verify your phone number.",
+        });
     }
     catch (error) {
         console.error(error);
@@ -117,20 +133,36 @@ exports.verifyEmail = verifyEmail;
 const verifyPhone = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { phoneNo, otp } = req.body;
     try {
-        const company = yield CompanyModel_1.default.findOne({ phoneNo, phoneVerificationCode: otp });
-        if (!company) {
+        const formattedPhoneNo = formatPhoneNumberToE164(phoneNo, "+91");
+        const verificationCheck = yield twilioClient.verify.v2
+            .services(process.env.TWILIO_VERIFY_SERVICE_SID)
+            .verificationChecks.create({
+            to: formattedPhoneNo,
+            code: otp,
+        });
+        if (verificationCheck.status !== "approved") {
             res.status(400).json({ message: "Invalid OTP or phone number" });
             return;
         }
+        const company = yield CompanyModel_1.default.findOne({ phoneNo: formattedPhoneNo });
+        if (!company) {
+            res.status(400).json({ message: "Company not found" });
+            return;
+        }
         company.isPhoneVerified = true;
-        company.phoneVerificationCode = null;
         yield company.save();
         if (company.isEmailVerified) {
             const token = generateJWT(company._id.toString());
-            res.status(200).json({ message: "Phone number verified successfully!", token });
+            res
+                .status(200)
+                .json({ message: "Phone number verified successfully!", token });
             return;
         }
-        res.status(200).json({ message: "Phone number verified successfully! Please verify your email." });
+        res
+            .status(200)
+            .json({
+            message: "Phone number verified successfully! Please verify your email.",
+        });
     }
     catch (error) {
         console.error(error);

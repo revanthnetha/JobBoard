@@ -7,6 +7,6 @@ const express_1 = __importDefault(require("express"));
 const Auth_1 = require("../../handlers/Auth");
 const Router = express_1.default.Router();
 Router.post("/register", Auth_1.registerCompany);
-Router.get("/verify-email", Auth_1.verifyEmail);
-Router.get("/verify-phone", Auth_1.verifyPhone);
+Router.post("/verify-email", Auth_1.verifyEmail);
+Router.post("/verify-phone", Auth_1.verifyPhone);
 exports.default = Router;

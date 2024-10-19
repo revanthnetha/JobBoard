@@ -7,7 +7,7 @@ import icons from "../assets/index";
 import { companyRegistrationSchema } from "../../../common/types/company-info";
 import z from "zod";
 import Input from "../components/Input";
-import Button from "../components/button";
+import Button from "../components/Button";
 import axios from "axios"
 import {BACKEND_URL} from "../../config"
 
@@ -102,7 +102,7 @@ const Signup = () => {
     if(token!=null){
       localStorage.setItem("jwtToken",`Bearer ${token}`)
     }
-
+    console.log(res.data)
     if (res.status === 200) {
       setEmailVerified(true);
       toast({
@@ -130,7 +130,7 @@ const Signup = () => {
     if(token!=null){
       localStorage.setItem("jwtToken",`Bearer ${token}`)
     }
-
+    console.log(res.data)
     if (res.status === 200) {
       setPhoneVerified(true);
       toast({
