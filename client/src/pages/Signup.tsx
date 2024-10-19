@@ -8,6 +8,9 @@ import { companyRegistrationSchema } from "../../../common/types/company-info";
 import z from "zod";
 import Input from "../components/Input";
 import Button from "../components/button";
+import axios from "axios"
+import {BACKEND_URL} from "../../config"
+
 
 const Signup = () => {
   const toast = useToast();
@@ -32,7 +35,6 @@ const Signup = () => {
   const [emailVerified, setEmailVerified] = useState(false);
   const [phoneVerified, setPhoneVerified] = useState(false);
 
-  // Handle form input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     if (currentStep === 0) {
@@ -48,8 +50,8 @@ const Signup = () => {
     }
   };
 
-  // Handle registration form submission
-  const handleSubmit = (e: React.FormEvent) => {
+ 
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (currentStep === 0) {
@@ -61,11 +63,18 @@ const Signup = () => {
           companyEmail: formData.companyEmail,
           companySize: Number(formData.companySize),
         });
-        // Move to OTP step if validation passes
+        const res = await axios.post(`${BACKEND_URL}company/register`,{
+          name:formData.name,
+          phoneNo:formData.phoneNo,
+          companyName:formData.companyName,
+          companyEmail: formData.companyEmail,
+          companySize: Number(formData.companySize)
+        })
+        console.log(res.data);
         setCurrentStep(1);
         toast({
           title: "Registration successful!",
-          description: "Please verify your email and phone.",
+          description: "Please verify OTP sent to your email and phone.",
           status: "success",
           duration: 3000,
           isClosable: true,
@@ -84,9 +93,17 @@ const Signup = () => {
     }
   };
 
-  // Handle email OTP verification
-  const verifyEmailOtp = () => {
-    if (otpData.emailOtp === "1234") { // Mock OTP validation
+  const verifyEmailOtp = async () => {
+    const res = await axios.post(`${BACKEND_URL}company/verify-email`, {
+      companyEmail: formData.companyEmail,  
+      otp: otpData.emailOtp,
+    });
+    const token = res.data.token;
+    if(token!=null){
+      localStorage.setItem("jwtToken",`Bearer ${token}`)
+    }
+
+    if (res.status === 200) {
       setEmailVerified(true);
       toast({
         title: "Email verified successfully",
@@ -104,9 +121,17 @@ const Signup = () => {
     }
   };
 
-  // Handle phone OTP verification
-  const verifyPhoneOtp = () => {
-    if (otpData.phoneOtp === "5678") { // Mock OTP validation
+  const verifyPhoneOtp = async () => {
+    const res = await axios.post(`${BACKEND_URL}company/verify-phone`, {
+      phoneNo: formData.phoneNo, 
+      otp: otpData.phoneOtp,     
+    });
+    const token = res.data.token;
+    if(token!=null){
+      localStorage.setItem("jwtToken",`Bearer ${token}`)
+    }
+
+    if (res.status === 200) {
       setPhoneVerified(true);
       toast({
         title: "Phone verified successfully",

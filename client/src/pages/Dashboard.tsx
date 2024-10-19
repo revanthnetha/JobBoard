@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { z } from "zod";
 import { jobSchema, jobRegistrationData } from "../../../common/types/job-info";
 import Button from "../components/button";
+import axios from "axios";
 
 const Dashboard = () => {
   const [jobTitle, setJobTitle] = useState<string>("");
@@ -55,7 +56,19 @@ const Dashboard = () => {
       jobSchema.parse(jobData);
       setErrors({});
 
-      // Send data to the backend
+      const response = await axios.post("/api/jobs", jobData,{
+        headers:{
+          Authorization:localStorage.getItem("jwtToken")
+        }
+      });
+      console.log(response.data);
+
+      setJobTitle("");
+      setJobDescription("");
+      setExperienceLevel("");
+      setCandidateEmails([]);
+      setEndDate("");
+      
       alert("Job created successfully!");
       setIsFormVisible(false);
     } catch (error) {

@@ -1,12 +1,18 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import icons from "../assets/index";
 
 const Appbar = () => {
   const { logo, home } = icons;
-  const token = true;
-  // localStorage.getItem("jwtToken")
+  const [token, setToken] = useState<string | null>(null);
+
+  useEffect(() => {
+    const storedToken = localStorage.getItem("jwtToken");
+    setToken(storedToken);
+  }, []);
+
   const handleSignOut = () => {
     localStorage.removeItem("jwtToken");
+    setToken(null);
     window.location.href = "/";
   };
 
@@ -17,7 +23,7 @@ const Appbar = () => {
       </div>
 
       <div className="flex items-center space-x-4">
-        <div className="text-[#576474] cursor-pointer text">Contact</div>
+        <div className="text-[#576474] cursor-pointer">Contact</div>
         {token && (
           <>
             <button
@@ -29,11 +35,12 @@ const Appbar = () => {
           </>
         )}
       </div>
+
       {token && (
         <div className="fixed top-24 left-0 w-14 h-full border-r shadow-md p-4 z-50">
           <ul>
-            <li className=" w-12 h-8 cursor-pointer flex">
-              <img src={home} alt="img" />
+            <li className="w-12 h-8 cursor-pointer flex">
+              <img src={home} alt="Home" />
             </li>
           </ul>
         </div>
