@@ -1,1 +1,0 @@
-export const BACKEND_URL = "https://jobboard-rb4h.onrender.com/api/"
