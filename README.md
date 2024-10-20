@@ -20,8 +20,8 @@ Follow the steps below to set it up locally.
 ## Getting Started
 
 ### 1. Clone the Repository
-git clone https://github.com/yourusername/your-repo-name.git
-cd your-repo-name
+- git clone https://github.com/revanthnetha/JobBoard.git
+- cd JobBoard
 
 ### Backend
 -cd server/
